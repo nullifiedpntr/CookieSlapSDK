@@ -1,0 +1,471 @@
+#CookieSlapSDK
+#made by stef
+#YOU ARE NOT ALLOWED TO DISTRIBUTE THIS AND CLAIM ITS YOUR OWN!
+#Copyright CoderzTeam 2020-2021
+
+
+#now lets get on to the fun stuff :)
+
+options:
+	prefix: &6Cookie&8Slap &a>>
+
+
+#basic functions
+function onJoinCheck(p: player):
+	wait 4.5 tick
+	if {map.death} is 1:
+		teleport {_p} to {spawnpoint}
+		wait 4.5 tick
+		give 1 cookie of knockback 10 named "&fCookie" with lore "&fThe Ultimate Slap Cookie." to {_p}
+	if {map.death} is 2:
+		teleport {_p} to {spawnpoint2}
+		wait 4.5 tick
+		give 1 cookie of knockback 10 named "&fCookie" with lore "&fThe Ultimate Slap Cookie." to {_p}
+	if {map.death} is 3:
+		teleport {_p} to {map3.spawn}
+		wait 4.5 tick
+		give 1 cookie of knockback 10 named "&fCookie" with lore "&fThe Ultimate Slap Cookie." to {_p}
+	if {map.death} is 4:
+		teleport {_p} to {map4.spawn}
+		wait 4.5 tick
+		give 1 cookie of knockback 10 named "&fCookie" with lore "&fThe Ultimate Slap Cookie." to {_p}
+	if {CookieSlap.IsInGame::%{_p}%} is false:
+		teleport {_p} to {CookieSlap.MainSpawn}
+		clear {_p}'s inventory
+		give 1 compass named "&bGamemodes" to {_p}
+		give 1 gold ingot named "&eCosmetics Shop" to {_p}
+	set {_p}'s gamemode to survival
+
+
+function onJoinMessage(p: player):
+	set {CookieSlap.IsInGame::%{_p}%} to false
+	send "{@prefix} &b&lWelcome to CookieSlap!" to {_p}
+	play level up at {_p} with pitch 1
+
+
+#setup the spawnpoint commands (you must use this for most functions)
+command setglobalspawnpoint:
+	permission: admin.cmds
+	trigger:
+		set {CookieSlap.MainSpawn} to location of player
+		send "{@prefix} Spawnpoint set!"
+		play level up at player with pitch 1
+
+command removeglobalspawnpoint:
+	permission: admin.cmds
+	trigger:
+		delete {CookieSlap.MainSpawn}
+		send "{@prefix} Spawnpoint removed!"
+		play level up at player with pitch 1
+
+
+options:
+    skname : CookieSlapSDK.sk
+    sounds : true
+    Map1 : Cookie #modify if needed
+    Map2 : Ice #modify if needed
+    Map3 : KingOfTheHill #modify if needed
+    Map4 : XMas #modify if needed
+    Map5 : None #modify if needed
+
+on skript load:
+	set {map1.votes} to 0
+	set {map2.votes} to 0
+	set {map3.votes} to 0
+	set {map4.votes} to 0
+	set {map5.votes} to 0
+	set {map.death} to 1
+	set {CookieSlap.CanVote} to true
+	delete {vote.%all players%}
+
+
+#setup gamemode functions 
+
+function leaveGame(p: player):
+	set {CookieSlap.IsInGame::%{_p}%} to false
+	teleport {_p} to {CookieSlap.MainSpawn}
+	clear {_p}'s inventory
+	send "{@prefix} &cYou left the game!" to {_p}
+	make console execute command "effect %{_p}% clear"
+
+
+
+function joinGame(p: player):
+	set {CookieSlap.IsInGame::%{_p}%} to true
+	set {_p}'s flight mode to false
+	Delete {fly.%{_p}%}
+	if {map.death} is 1:
+		clear {_p}'s inventory
+		teleport {_p} to {map1.spawn}
+		give 1 cookie of knockback 10 named "&fCookie" with lore "&fThe Ultimate Slap Cookie." to {_p}
+		send "{@prefix} You joined the game!" to {_p}
+	if {map.death} is 2:
+		clear {_p}'s inventory
+		teleport {_p} to {map2.spawn}
+		give 1 cookie of knockback 10 named "&fCookie" with lore "&fThe Ultimate Slap Cookie." to {_p}
+		send "{@prefix} You joined the game!" to {_p}
+	if {map.death} is 3:
+		clear {_p}'s inventory
+		teleport {_p} to {map3.spawn}
+		give 1 cookie of knockback 10 named "&fCookie" with lore "&fThe Ultimate Slap Cookie." to {_p}
+		send "{@prefix} You joined the game!" to {_p}
+	if {map.death} is 4:
+		clear {_p}'s inventory
+		teleport {_p} to {map4.spawn}
+		give 1 cookie of knockback 10 named "&fCookie" with lore "&fThe Ultimate Slap Cookie." to {_p}
+		send "{@prefix} You joined the game!" to {_p}
+
+
+command /vote [<number>]:
+    trigger:
+        if arg 1 is set:
+            if {CookieSlap.CanVote} is true:
+                if {vote.%player%} isn't set:
+                    arg 1 is smaller than 5:
+                        add 1 to {map%arg 1%.votes}
+                        set {vote.%player%} to true
+                        send "{@prefix} &aYou have voted this map: &6%arg 1%" to player
+                    if {@sounds} is true:
+                        play level up at player with pitch 1
+                    if {@sounds} is true:
+                        play note bass at player with pitch 1
+                else:
+                    send "{@prefix} &cYou already voted!" to player
+                    if {@sounds} is true:
+                        play note bass at player with pitch 1
+            else:
+                #cancel event
+                send "{@prefix} &cThe round already started!"
+                play note bass at player with pitch 1
+
+        if arg 1 is not set:
+            send "{@prefix}&a 1&8 >&6 {@Map1} &8(&6%{map1.votes}%&8)" to player
+            send "{@prefix}&a 2&8 >&6 {@Map2} &8(&6%{map2.votes}%&8)" to player
+            send "{@prefix}&a 3&8 > &a{@Map3} &8(&6%{map3.votes}%&8)" to player
+            send "{@prefix}&a 4&8 > &a{@Map4} &8(&6%{map4.votes}%&8)" to player
+            send "{@prefix}&2 Vote using &8[&6/vote <number>&8]" to player
+
+
+every 30 seconds:
+	if {map1.votes} is bigger than {map2.votes} and {map3.votes} and {map4.votes} and {map5.votes}:
+		loop all players:
+			if {CookieSlap.IsInGame::%loop-player%} is true:
+				teleport all players to {map1.spawn}
+				set {map.death} to 1
+				send "{@prefix} &aCookie map selected! First player to get 30 points will win." to loop-player
+				set {CookieSlap.GameEnded} to false
+				set {CookieSlap.CanVote} to false
+				make console execute command "effect %loop-player% clear"
+				make console execute command "resetvotes %loop-player%"
+				make console execute command "resetpoints %loop-player%"
+	if {map2.votes} is bigger than {map3.votes} and {map4.votes} and {map5.votes} and {map1.votes}:
+		loop all players:
+			if {CookieSlap.IsInGame::%loop-player%} is true:
+				teleport all players to {map2.spawn}
+				set {map.death} to 2
+				send "{@prefix} &aIce map selected! First player to get 30 points will win." to loop-player
+				set {CookieSlap.GameEnded} to false
+				set {CookieSlap.CanVote} to false
+				make console execute command "effect %loop-player% clear"
+				make console execute command "resetvotes %loop-player%"
+				make console execute command "resetpoints %loop-player%"
+	if {map3.votes} is bigger than {map4.votes} and {map5.votes} and {map1.votes} and {map2.votes}:
+		loop all players:
+			if {CookieSlap.IsInGame::%loop-player%} is true:
+				teleport all players to {map3.spawn}
+				set {map.death} to 3
+				send "{@prefix} &aKingOfTheHill map selected! First player to click on the diamond block will win." to loop-player
+				set {CookieSlap.GameEnded} to false
+				set {CookieSlap.CanVote} to false
+				make console execute command "effect %loop-player% clear"
+				make console execute command "resetvotes %loop-player%"
+				make console execute command "resetpoints %loop-player%"
+				set {map1.votes} to 0
+				set {map2.votes} to 0
+				set {map3.votes} to 0
+				set {map4.votes} to 0
+				set {map5.votes} to 0
+				set {CookieSlap.DiamondBlock} to false
+				stop
+	if {map4.votes} is bigger than {map3.votes} and {map5.votes} and {map1.votes} and {map2.votes}:
+		loop all players:
+			if {CookieSlap.IsInGame::%loop-player%} is true:
+				teleport all players to {map4.spawn}
+				set {map.death} to 4
+				send "{@prefix} &aXMas map selected! First player to get 30 points will win." to loop-player
+				set {CookieSlap.GameEnded} to false
+				set {CookieSlap.CanVote} to false
+				make console execute command "effect %loop-player% clear"
+				make console execute command "resetvotes %loop-player%"
+				make console execute command "resetpoints %loop-player%"
+				set {map1.votes} to 0
+				set {map2.votes} to 0
+				set {map3.votes} to 0
+				set {map4.votes} to 0
+				set {map5.votes} to 0
+				stop
+	else:
+		set {map1.votes} to 0
+		set {map2.votes} to 0
+		set {map3.votes} to 0
+		set {map4.votes} to 0
+		set {map5.votes} to 0
+		delete {vote.%all players%}
+
+command /v [<number>]:
+    trigger:
+        if arg 1 is set:
+            player command "vote %arg 1%"
+        if arg 1 is not set:
+            player command "vote"
+
+
+on join:
+	send "{@prefix} &aThis server is running CookieSlapSDK v1.0" to player 
+
+
+command cookieslap [<text>] [<number>]:
+    permission: admin.cmds
+    permission message: {@prefix} &cNo permission!
+    trigger:
+        if arg 1 is not "set" or "help" or "by" or "info" or "reload" or "vote":
+            message "{@prefix} &cInvaild option&8: &7%arg-1%"
+            if {@sounds} is true:
+                play note bass at player with pitch 1
+        if arg 2 is not 1 or 2 or 3 or 4 or 5:
+            message "{@prefix} &cInvaild option&8: &7%arg-2%"
+            if {@sounds} is true:
+                play note bass at player with pitch 1
+        if arg 1 is "set":
+            if arg 2 is 1:
+                set {map1.spawn} to location of player
+                send "{@prefix} &aSpawnpoint of Map 1 has been set to your location." to player
+                if {@sounds} is true:
+                    play level up at player with pitch 1
+        if arg 1 is "set":
+            if arg 2 is 2:
+                set {map2.spawn} to location of player
+                send "{@prefix} &aSpawnpoint of Map 2 has been set to your location." to player
+                if {@sounds} is true:
+                    play level up at player with pitch 1
+        if arg 1 is "set":
+            if arg 2 is 3:
+                set {map3.spawn} to location of player
+                send "{@prefix} &aSpawnpoint of Map 3 has been set to your location." to player
+                if {@sounds} is true:
+                    play level up at player with pitch 1
+        if arg 1 is "set":
+            if arg 2 is 4:
+                set {map4.spawn} to location of player
+                send "{@prefix} &aSpawnpoint of Map 4 has been set to your location." to player
+                if {@sounds} is true:
+                    play level up at player with pitch 1
+        if arg 1 is "set":
+            if arg 2 is 5:
+                set {map5.spawn} to location of player
+                send "{@prefix} &aSpawnpoint of Map 5 has been set to your location." to player
+                if {@sounds} is true:
+                    play level up at player with pitch 1
+        if arg 1 is not set:
+            send "{@prefix} &a/vote <number>" to player
+            send "{@prefix} &a/cookieslap help" to player
+            send "{@prefix} &a/cookieslap set <1:2:3:4:5>" to player
+            send "{@prefix} &a/cookieslap by" to player
+            send "{@prefix} &a/cookieslap info" to player
+            send "{@prefix} &a/cookieslap reload" to player
+            send "{@prefix} &a/cookieslap vote" to player
+            if {@sounds} is true:
+                play level up at player with pitch 1
+        if arg 1 is "help":
+            send "{@prefix} &a/vote <number>" to player
+            send "{@prefix} &a/cookieslap help" to player
+            send "{@prefix} &a/cookieslap set <1:2:3:4:5>" to player
+            send "{@prefix} &a/cookieslap by" to player
+            send "{@prefix} &a/cookieslap info" to player
+            send "{@prefix} &a/cookieslap reload" to player
+            send "{@prefix} &a/cookieslap vote" to player
+            if {@sounds} is true:
+                play level up at player with pitch 1
+        if arg 1 is "by":
+            if arg 2 is not set:
+                send "{@prefix} Server running CookieSlapSDK v1.0 by stef"
+                #send "{@prefix} Plugin Description: Without this, CookieSlap wouldn't be a thing. This plugin adds the minigame, commands and the map voting system."
+                if {@sounds} is true:
+                    play level up at player with pitch 1
+            else:
+                send "{@prefix} &cOpss!" to player
+                if {@sounds} is true:
+                    play note bass at player with pitch 1
+        if arg 1 is "info":
+            if arg 2 is not set:
+                send "{@prefix} &6CookieSlapSDK" to player
+                send "{@prefix} &7Version: v1.0" to player
+                if {@sounds} is true:
+                    play level up at player with pitch 1
+            else:
+                send "{@prefix} &cOpss!" to player
+                if {@sounds} is true:
+                    play note bass at player with pitch 1
+        if arg 1 is "reload":
+            if arg 2 is not set:
+                send "{@prefix} &aSDK Reloaded" to player
+                console command "skript reload {@skname}"
+                if {@sounds} is true:
+                    play level up at player with pitch 1
+            else:
+                send "{@prefix} &cOpss!" to player
+                if {@sounds} is true:
+                    play note bass at player with pitch 1
+        if arg 1 is "vote":
+            if arg 2 is set:
+                player command "vote %arg 2%"
+                if {@sounds} is true:
+                    play level up at player with pitch 1
+            else:
+                send "{@prefix} &cOpss!" to player
+                if {@sounds} is true:
+                    play note bass at player with pitch 1
+
+
+
+command setcookiemapspawnpoint:
+	permission: admin.setglobalspawnpoint
+	permission message: &cNo permission! Sorry mate :P
+	trigger:
+		set {spawnpoint} to location of player
+		send "{@prefix} &aSpawnpoint set!"
+
+command seticemapspawnpoint:
+	permission: admin.setglobalspawnpoint
+	permission message: &cNo permission! Sorry mate :P
+	trigger:
+		set {spawnpoint2} to location of player
+		send "{@prefix} &aSpawnpoint set!"
+
+
+command resetspawns:
+	permission: admin
+	trigger:
+		delete {spawnpoint}
+		delete {spawnpoint2}
+
+
+on left click on a diamond block:
+	if {CookieSlap.DiamondBlock} is false:
+		set {CookieSlap.GameEnded} to true
+		set {CookieSlap.CanVote} to true
+		broadcast "&c&lRound won by %player%."
+		broadcast "{@prefix}&a 1&8 > &a{@Map1} &8(&6%{map1.votes}%&8)"
+		broadcast "{@prefix}&a 2&8 > &a{@Map2} &8(&6%{map2.votes}%&8)"
+		broadcast "{@prefix}&a 3&8 > &a{@Map3} &8(&6%{map3.votes}%&8)"
+		broadcast "{@prefix}&a 4&8 > &a{@Map4} &8(&6%{map4.votes}%&8)"
+		broadcast "{@prefix}&2 Vote using &8[&a/vote (number)&8]"
+		set {CookieSlap.DiamondBlock} to true
+		stop
+
+
+
+on damage:
+	wait 4.5 tick
+	if attacker is holding cookie of knockback 10 named "&fCookie" with lore "&fThe Ultimate Slap Cookie.":
+		add 1 to {CookieSlap.Points::%attacker%}
+		set action bar of attacker to "&a+1 Point. You now have %{CookieSlap.Points::%attacker%}% points."
+	if {CookieSlap.Points::%attacker%} > 29:
+		if {map.death} is 1:
+			set {CookieSlap.GameEnded} to true
+			set {CookieSlap.CanVote} to true
+			make console execute command "resetpoints %attacker%"
+			broadcast "&c&l%attacker% has won the round."
+			broadcast "{@prefix}&a 1&8 > &a{@Map1} &8(&6%{map1.votes}%&8)"
+			broadcast "{@prefix}&a 2&8 > &a{@Map2} &8(&6%{map2.votes}%&8)"
+			broadcast "{@prefix}&a 3&8 > &a{@Map3} &8(&6%{map3.votes}%&8)"
+			broadcast "{@prefix}&a 4&8 > &a{@Map4} &8(&6%{map4.votes}%&8)"
+			broadcast "{@prefix}&2 Vote using &8[&a/vote (number)&8]"
+			stop
+		if {map.death} is 2:
+			set {CookieSlap.GameEnded} to true
+			set {CookieSlap.CanVote} to true
+			make console execute command "resetpoints %attacker%"
+			broadcast "&c&l%attacker% has won the round."
+			broadcast "{@prefix}&a 1&8 > &a{@Map1} &8(&6%{map1.votes}%&8)"
+			broadcast "{@prefix}&a 2&8 > &a{@Map2} &8(&6%{map2.votes}%&8)"
+			broadcast "{@prefix}&a 3&8 > &a{@Map3} &8(&6%{map3.votes}%&8)"
+			broadcast "{@prefix}&a 4&8 > &a{@Map4} &8(&6%{map4.votes}%&8)"
+			broadcast "{@prefix}&2 Vote using &8[&a/vote (number)&8]"
+			stop
+		if {map.death} is 4:
+			set {CookieSlap.GameEnded} to true
+			set {CookieSlap.CanVote} to true
+			make console execute command "resetpoints %attacker%"
+			broadcast "&c&l%attacker% has won the round."
+			broadcast "{@prefix}&a 1&8 > &a{@Map1} &8(&6%{map1.votes}%&8)"
+			broadcast "{@prefix}&a 2&8 > &a{@Map2} &8(&6%{map2.votes}%&8)"
+			broadcast "{@prefix}&a 3&8 > &a{@Map3} &8(&6%{map3.votes}%&8)"
+			broadcast "{@prefix}&a 4&8 > &a{@Map4} &8(&6%{map4.votes}%&8)"
+			broadcast "{@prefix}&2 Vote using &8[&a/vote (number)&8]"
+			stop
+
+command endgame:
+	permission: admin.cmds
+	trigger:
+		add 31 to {CookieSlap.Points::%player%}
+		set action bar of player to "&a+31 Points. You now have %{CookieSlap.Points::%player%}% points."
+		if {CookieSlap.Points::%player%} > 29:
+			if {map.death} is 1:
+				set {CookieSlap.GameEnded} to true
+				set {CookieSlap.CanVote} to true
+				make console execute command "resetpoints %player%"
+				broadcast "&c&lGame was ForceEnded by a staff member."
+				broadcast "{@prefix}&a 1&8 > &a{@Map1} &8(&6%{map1.votes}%&8)"
+				broadcast "{@prefix}&a 2&8 > &a{@Map2} &8(&6%{map2.votes}%&8)"
+				broadcast "{@prefix}&a 3&8 > &a{@Map3} &8(&6%{map3.votes}%&8)"
+				broadcast "{@prefix}&a 4&8 > &a{@Map4} &8(&6%{map4.votes}%&8)"
+				broadcast "{@prefix}&2 Vote using &8[&a/vote (number)&8]"
+				stop
+			if {map.death} is 2:
+				set {CookieSlap.GameEnded} to true
+				set {CookieSlap.CanVote} to true
+				make console execute command "resetpoints %player%"
+				broadcast "&c&lGame was ForceEnded by a staff member."
+				broadcast "{@prefix}&a 1&8 > &a{@Map1} &8(&6%{map1.votes}%&8)"
+				broadcast "{@prefix}&a 2&8 > &a{@Map2} &8(&6%{map2.votes}%&8)"
+				broadcast "{@prefix}&a 3&8 > &a{@Map3} &8(&6%{map3.votes}%&8)"
+				broadcast "{@prefix}&a 4&8 > &a{@Map4} &8(&6%{map4.votes}%&8)"
+				broadcast "{@prefix}&2 Vote using &8[&a/vote (number)&8]"
+				stop
+			if {map.death} is 4:
+				set {CookieSlap.gamemodemeEnded} to true
+				set {CookieSlap.CanVote} to true
+				make console execute command "resetpoints %player%"
+				broadcast "&c&lGame was ForceEnded by a staff member."
+				broadcast "{@prefix}&a 1&8 > &a{@Map1} &8(&6%{map1.votes}%&8)"
+				broadcast "{@prefix}&a 2&8 > &a{@Map2} &8(&6%{map2.votes}%&8)"
+				broadcast "{@prefix}&a 3&8 > &a{@Map3} &8(&6%{map3.votes}%&8)"
+				broadcast "{@prefix}&a 4&8 > &a{@Map4} &8(&6%{map4.votes}%&8)"
+				broadcast "{@prefix}&2 Vote using &8[&a/vote (number)&8]"
+				stop
+
+
+
+
+
+command resetpoints <offline player>:
+	permission: admin.resetpoints
+	permission message: &cNo permission! Sorry mate :P
+	trigger:
+		set {CookieSlap.Points::%arg 1%} to 0
+		send "{@prefix} &aPoints reset."
+
+command seepoints <offline player>:
+	trigger:
+		send "{@prefix} %arg 1% has %{CookieSlap.Points::%arg 1%}% points."
+
+
+
+
+
+
+
+
+
+#now that the SDK is done, feel free to code with it below this line.
